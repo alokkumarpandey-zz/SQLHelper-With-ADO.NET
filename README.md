@@ -1,4 +1,4 @@
-# SQLHelper-With-ADO.NET
+# SQLHelper With ADO.NET
 User pure ADO.NET with SQLHelper for performance critical applications
 
 If you working with .NET framework from a long time then you must have used SQL Helper or a similar library to work with SQL Server or if you working with some performance-critical applications and want to directly work with ADO.NET then you can use your ADO.NET with this SQL helper. I tried to convert it so that it can work with ADO.NET as well as achieve async feature as well in .NET Core 2.x.
