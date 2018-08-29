@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace SQLHelper
 {
-    public class SQLHandlerAsync
+    public partial class SQLHandlerAsync
     {
         public static string Connectionconfig;
         #region "Private Members"
