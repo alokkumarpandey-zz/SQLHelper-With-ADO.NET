@@ -233,8 +233,7 @@ namespace SQLHelper
             string SQL = string.Empty;
             string Exceptions = string.Empty;
             string Delimiter = "GO" + Environment.NewLine;
-
-            string[] arrSQL = Script.Split(Delimiter, -1);
+            string[] arrSQL = Script.Split(new[] { Delimiter }, StringSplitOptions.None);
             bool IgnoreErrors;
             foreach (string SQLforeach in arrSQL)
             {
@@ -304,7 +303,7 @@ namespace SQLHelper
             else
             {
                 string Delimiter = "GO" + Environment.NewLine;
-                string[] arrSQL = Script.Split(Delimiter, -1);
+                string[] arrSQL = Script.Split(new[] { Delimiter }, StringSplitOptions.None);
                 foreach (string SQLforeach in arrSQL)
                 {
                     if (!string.IsNullOrEmpty(SQLforeach))
@@ -333,7 +332,7 @@ namespace SQLHelper
             string Exceptions = string.Empty;
 
             string Delimiter = "GO" + Environment.NewLine;
-            string[] arrSQL = Script.Split(Delimiter, -1);
+            string[] arrSQL = Script.Split(new[] { Delimiter }, StringSplitOptions.None);
             foreach (string SQLforeach in arrSQL)
             {
                 if (!string.IsNullOrEmpty(SQLforeach))
