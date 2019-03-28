@@ -1,4 +1,4 @@
-﻿#region "References"
+#region "References"
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -14,8 +14,16 @@ using System.Data;
 
 namespace SQLHelper
 {
+    /// <summary>
+    /// Application data source helper.
+    /// </summary>
     public class DataSourceHelper
     {
+        /// <summary>
+        /// Teturn array list from object.
+        /// </summary>
+        /// <param name="objType">Type od datatype.</param>
+        /// <returns>Array list</returns>
         public static ArrayList GetPropertyInfo(Type objType)
         {
 
@@ -34,21 +42,66 @@ namespace SQLHelper
             return objProperties;
 
         }
+        /// <summary>
+        /// Returns  all colums name(lower case) of reader 
+        /// </summary>
+        /// <param name="reader"></param>
+        /// <returns></returns>
+        private static string[] GetReaderColumns(IDataReader reader)
+        {
+            int len = reader.FieldCount;
+            string[] lstCol = new string[len];
+            for (int i = 0; i < len; i++)
+            {
+                lstCol[i] = (reader.GetName(i).ToLower());
+            }
+            return lstCol;
+        }
+        /// <summary>
+        /// Return Object Properties that only exists in data reader columns
+        /// </summary>
+        /// <param name="objType"></param>
+        /// <param name="rdr"></param>
+        /// <returns></returns>
+        private static ArrayList GetPropertiesOnlyExistsInReader(Type objType, IDataReader rdr)
+        {
+            ArrayList lstProb = new ArrayList();
+            if (rdr != null)
+            {
+                string[] rdrCols = GetReaderColumns(rdr);
+                PropertyInfo[] pInfo = objType.GetProperties();
+                foreach (PropertyInfo objProperty in pInfo)
+                {
+                    if (Array.IndexOf(rdrCols, objProperty.Name.ToLower()) > -1)
+                    {
+                        lstProb.Add(objProperty);
+                    }
+                }
+            }
+            return lstProb;
+        }
 
+        /// <summary>
+        /// Return object of array of integer.
+        /// </summary>
+        /// <param name="objProperties">ArrayList</param>
+        /// <param name="dr">The DataReader</param>
+        /// <returns>Array of integer.</returns>
         private static int[] GetOrdinals(ArrayList objProperties, IDataReader dr)
         {
-
-            int[] arrOrdinals = new int[objProperties.Count + 1];
+            int Counter = objProperties.Count;
+            int[] arrOrdinals = new int[Counter];
             int intProperty;
 
             if ((dr != null))
             {
-                for (intProperty = 0; intProperty <= objProperties.Count - 1; intProperty++)
+                for (intProperty = 0; intProperty < Counter; intProperty++)
                 {
                     arrOrdinals[intProperty] = -1;
                     try
                     {
-                        arrOrdinals[intProperty] = dr.GetOrdinal(((PropertyInfo)objProperties[intProperty]).Name);
+                        string PropName = ((PropertyInfo)objProperties[intProperty]).Name;
+                        arrOrdinals[intProperty] = dr.GetOrdinal(PropName);
                     }
                     catch
                     {
@@ -60,7 +113,14 @@ namespace SQLHelper
             return arrOrdinals;
 
         }
-
+        /// <summary>
+        /// Return object based on parameters.
+        /// </summary>
+        /// <param name="objType">Type od datatype.</param>
+        /// <param name="dr">The DataReader</param>
+        /// <param name="objProperties">ArrayList</param>
+        /// <param name="arrOrdinals">Array of integer.</param>
+        /// <returns>Object</returns>
         private static object CreateObject(Type objType, IDataReader dr, ArrayList objProperties, int[] arrOrdinals)
         {
 
@@ -71,11 +131,12 @@ namespace SQLHelper
 
             //objPropertyInfo.ToString() == BuiltyNumber
             object objObject = Activator.CreateInstance(objType);
-
+            int counter = objProperties.Count;
             // fill object with values from datareader
-            for (intProperty = 0; intProperty <= objProperties.Count - 1; intProperty++)
+            for (intProperty = 0; intProperty < counter; intProperty++)
             {
                 objPropertyInfo = (PropertyInfo)objProperties[intProperty];
+
                 if (objPropertyInfo.CanWrite)
                 {
                     objValue = Null.SetNull(objPropertyInfo);
@@ -141,7 +202,12 @@ namespace SQLHelper
             return objObject;
 
         }
-
+        /// <summary>
+        /// Reuturn object based on given parameters.
+        /// </summary>
+        /// <param name="dr">The DataReader.</param>
+        /// <param name="objType">Type od datatype.</param>
+        /// <returns>Object</returns>
         public static object FillObject(IDataReader dr, Type objType)
         {
 
@@ -155,7 +221,7 @@ namespace SQLHelper
             object objFillObject;
 
             // get properties for type
-            ArrayList objProperties = GetPropertyInfo(objType);
+            ArrayList objProperties = GetPropertiesOnlyExistsInReader(objType, dr);
 
             // get ordinal positions in datareader
             int[] arrOrdinals = GetOrdinals(objProperties, dr);
@@ -197,7 +263,12 @@ namespace SQLHelper
             return objFillObject;
 
         }
-
+        /// <summary>
+        /// Return list of array.
+        /// </summary>
+        /// <param name="dr">The DataReader</param>
+        /// <param name="objType">Type od datatype.</param>
+        /// <returns>Object of ArrayList</returns>
         public static ArrayList FillCollection(IDataReader dr, Type objType)
         {
 
@@ -205,7 +276,7 @@ namespace SQLHelper
             object objFillObject;
 
             // get properties for type
-            ArrayList objProperties = GetPropertyInfo(objType);
+            ArrayList objProperties = GetPropertiesOnlyExistsInReader(objType, dr);
 
             // get ordinal positions in datareader
             int[] arrOrdinals = GetOrdinals(objProperties, dr);
@@ -228,14 +299,20 @@ namespace SQLHelper
             return objFillCollection;
 
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="dr">The DataReader.</param>
+        /// <param name="objType">Type of datatype.</param>
+        /// <param name="objToFill">The List.</param>
+        /// <returns>Object of list.</returns>
         public static IList FillCollection(IDataReader dr, Type objType, ref IList objToFill)
         {
 
             object objFillObject;
 
             // get properties for type
-            ArrayList objProperties = GetPropertyInfo(objType);
+            ArrayList objProperties = GetPropertiesOnlyExistsInReader(objType, dr);
 
             // get ordinal positions in datareader
             int[] arrOrdinals = GetOrdinals(objProperties, dr);
@@ -258,7 +335,12 @@ namespace SQLHelper
             return objToFill;
 
         }
-
+        /// <summary>
+        /// Return object.
+        /// </summary>
+        /// <param name="objObject">object</param>
+        /// <param name="objType">Type of datatype.</param>
+        /// <returns>object</returns>
         public static object InitializeObject(object objObject, Type objType)
         {
             PropertyInfo objPropertyInfo;
@@ -267,9 +349,9 @@ namespace SQLHelper
 
             // get properties for type
             ArrayList objProperties = GetPropertyInfo(objType);
-
+            int counter = objProperties.Count;
             // initialize properties
-            for (intProperty = 0; intProperty <= objProperties.Count - 1; intProperty++)
+            for (intProperty = 0; intProperty < counter; intProperty++)
             {
                 objPropertyInfo = (PropertyInfo)objProperties[intProperty];
                 if (objPropertyInfo.CanWrite)
@@ -282,30 +364,23 @@ namespace SQLHelper
             return objObject;
 
         }
-
-
-
+        /// <summary>
+        /// Return object of XmlDocument.
+        /// </summary>
+        /// <param name="objObject">object</param>
+        /// <returns>Object of XmlDocument.</returns>
         public static XmlDocument Serialize(object objObject)
         {
 
             XmlSerializer objXmlSerializer = new XmlSerializer(objObject.GetType());
-
             StringBuilder objStringBuilder = new StringBuilder();
-
             TextWriter objTextWriter = new StringWriter(objStringBuilder);
-
             objXmlSerializer.Serialize(objTextWriter, objObject);
-
             StringReader objStringReader = new StringReader(objTextWriter.ToString());
-
             DataSet objDataSet = new DataSet();
-
             objDataSet.ReadXml(objStringReader);
-
             XmlDocument xmlSerializedObject = new XmlDocument();
-
             xmlSerializedObject.LoadXml(objDataSet.GetXml());
-
             return xmlSerializedObject;
 
         }
@@ -336,13 +411,15 @@ namespace SQLHelper
             T objObject = Activator.CreateInstance<T>();
 
             // get properties for type
-            ArrayList objProperties = GetPropertyInfo(objObject.GetType());
+            ArrayList objProperties = GetPropertiesOnlyExistsInReader(objObject.GetType(), dr);
+
+
 
             // get ordinal positions in datareader
             int[] arrOrdinals = GetOrdinals(objProperties, dr);
-
+            int counter = objProperties.Count;
             // fill object with values from datareader
-            for (intProperty = 0; intProperty <= objProperties.Count - 1; intProperty++)
+            for (intProperty = 0; intProperty < counter; intProperty++)
             {
                 objPropertyInfo = (PropertyInfo)objProperties[intProperty];
                 if (objPropertyInfo.CanWrite)
@@ -563,7 +640,7 @@ namespace SQLHelper
         }
 
         #endregion
-		#region Dinesh Hona Modification
+        #region Add new
 
         /// -----------------------------------------------------------------------------
         /// <summary>
@@ -575,7 +652,6 @@ namespace SQLHelper
         /// <returns>A List of custom business objects</returns>
         /// <remarks></remarks>
         /// <history>
-        /// 	[dinesh]	4/22/2011	Created
         /// </history>
         /// -----------------------------------------------------------------------------
         public static List<T> FillCollection<T>(DataTable dt)
@@ -599,9 +675,6 @@ namespace SQLHelper
         /// <param name="dr">The DataRow</param>
         /// <returns>The custom business object</returns>
         /// <remarks></remarks>
-        /// <history>
-        /// 	[dinesh]	4/22/2011	Created
-        /// </history>
         /// -----------------------------------------------------------------------------
         private static T CreateObject<T>(DataRow dr)
         {
@@ -612,7 +685,9 @@ namespace SQLHelper
             int intProperty;
             T objObject = Activator.CreateInstance<T>();
             ArrayList objProperties = GetPropertyInfo(objObject.GetType());
-            for (intProperty = 0; intProperty <= objProperties.Count - 1; intProperty++)
+            int counter = objProperties.Count;
+
+            for (intProperty = 0; intProperty < counter; intProperty++)
             {
                 objPropertyInfo = (PropertyInfo)objProperties[intProperty]; if (objPropertyInfo.CanWrite)
                 {
