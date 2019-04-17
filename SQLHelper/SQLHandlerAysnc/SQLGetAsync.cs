@@ -14,54 +14,6 @@ namespace SQLHelper
             _connectionString = Connectionconfig;
         }
 
-        /// <summary>
-        /// Execute As DataSet
-        /// </summary>
-        /// <param name="StroredProcedureName">StoreProcedure Name</param>
-        /// <param name="ParaMeterCollection">Accept Key Value Collection For Parameters</param>
-        /// <returns></returns>
-        public async Task<DataSet> ExecuteAsDataSetAsync(string StroredProcedureName, List<KeyValuePair<string, object>> ParaMeterCollection)
-        {
-            using (SqlConnection SQLConn = new SqlConnection(this._connectionString))
-            {
-                using (SqlCommand SQLCmd = new SqlCommand())
-                {
-                    SqlDataAdapter SQLAdapter = new SqlDataAdapter();
-                    DataSet SQLds = new DataSet();
-                    SQLCmd.Connection = SQLConn;
-                    SQLCmd.CommandText = StroredProcedureName;
-                    SQLCmd.CommandType = CommandType.StoredProcedure;
-
-                    //Loop for Paramets
-                    for (int i = 0; i < ParaMeterCollection.Count; i++)
-                    {
-                        SqlParameter sqlParaMeter = new SqlParameter();
-                        sqlParaMeter.IsNullable = true;
-                        sqlParaMeter.ParameterName = ParaMeterCollection[i].Key;
-                        sqlParaMeter.Value = ParaMeterCollection[i].Value;
-                        SQLCmd.Parameters.Add(sqlParaMeter);
-                    }
-                    //End of for loop
-
-                    SQLAdapter.SelectCommand = SQLCmd;
-                    try
-                    {
-                        await SQLConn.OpenAsync();
-                        SQLAdapter.Fill(SQLds);
-                        SQLConn.Close();
-                        return SQLds;
-                    }
-                    catch (Exception e)
-                    {
-                        throw e;
-                    }
-                    finally
-                    {
-                        SQLConn.Close();
-                    }
-                }
-            }
-        }
 
 
         /// <summary>
@@ -169,41 +121,6 @@ namespace SQLHelper
             }
         }
 
-        /// <summary>
-        /// Execute As DataSet
-        /// </summary>
-        /// <param name="StroredProcedureName">StoreProcedure Name</param>
-        /// <returns></returns>
-        public async Task<DataSet> ExecuteAsDataSetAsync(string StroredProcedureName)
-        {
-            using (SqlConnection SQLConn = new SqlConnection(this._connectionString))
-            {
-                using (SqlCommand SQLCmd = new SqlCommand())
-                {
-                    SqlDataAdapter SQLAdapter = new SqlDataAdapter();
-                    DataSet SQLds = new DataSet();
-                    SQLCmd.Connection = SQLConn;
-                    SQLCmd.CommandText = StroredProcedureName;
-                    SQLCmd.CommandType = CommandType.StoredProcedure;
-                    SQLAdapter.SelectCommand = SQLCmd;
-                    try
-                    {
-                        await SQLConn.OpenAsync();
-                        SQLAdapter.Fill(SQLds);
-                        SQLConn.Close();
-                        return SQLds;
-                    }
-                    catch (Exception e)
-                    {
-                        throw e;
-                    }
-                    finally
-                    {
-                        SQLConn.Close();
-                    }
-                }
-            }
-        }
 
         /// <summary>
         /// Execute As Scalar 

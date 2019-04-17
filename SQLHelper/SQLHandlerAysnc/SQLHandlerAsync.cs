@@ -351,7 +351,7 @@ namespace SQLHelper
             }
             if (typeof(T) == typeof(string))
             {
-                SQLCmd.Parameters.Add(new SqlParameter(OutPutParamerterName, SqlDbType.NVarChar, 50));
+                SQLCmd.Parameters.Add(new SqlParameter(OutPutParamerterName, SqlDbType.NVarChar, 255));
                 SQLCmd.Parameters[OutPutParamerterName].Direction = ParameterDirection.Output;
             }
             if (typeof(T) == typeof(bool))
@@ -411,7 +411,7 @@ namespace SQLHelper
             }
             if (typeof(T) == typeof(string))
             {
-                SQLCmd.Parameters.Add(new SqlParameter(OutPutParamerterName, SqlDbType.NVarChar, 50));
+                SQLCmd.Parameters.Add(new SqlParameter(OutPutParamerterName, SqlDbType.NVarChar, 255));
                 SQLCmd.Parameters[OutPutParamerterName].Direction = ParameterDirection.Output;
             }
             if (typeof(T) == typeof(bool))
