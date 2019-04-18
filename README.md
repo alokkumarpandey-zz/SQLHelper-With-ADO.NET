@@ -4,17 +4,27 @@ Use pure ADO.NET with SQLHelper for performance critical applications
 If you working with .NET framework from a long time then you must have used **SQL Helper** or a similar library to work with SQL Server or if you working with some performance-critical applications and want to directly work with ADO.NET then you can use your ADO.NET with this SQL helper. I tried to convert it so that it can work with **ADO.NET** as well as achieve async feature as well in **.NET Core 2.x.**
 
 So this SQL Helper Library basically has two main class file, that can be used easily for DML operations of SQL Database. A one just has to create an object and start using it.
-The two class are,
+The two base class are,
 
 * SQLHandler
 * SQLHandlerAsync
+
+And **DML Class** like,
+*SQLAddUpdate
+*SQLGet
+*SQLGetList
+*SQLRaw
+*SQLAddUpdateAsync
+*SQLGetAsync
+*SQLGetListAsync
+*SQLRawAsync
 
 And **helper classes** are
 
 * DataSourceHelper
 * Null
 
-So this two **SQLHandler and SQLHandlerAsync** classes have pure **ADO.NET methods** like,
+So these classes of DML derived from **SQLHandler and SQLHandlerAsync** classes and have pure **ADO.NET methods** like,
 
 * ExecuteNonQuery and  ExecuteNonQueryAsync,
 * ExecuteAsDataSet and ExecuteAsDataSetAsync,
@@ -30,41 +40,40 @@ Which can be used directly and can provide the best performance as required and 
 This SQLHandler and SQLHandlerAsync use NuGetPackage **System.Data.SqlClient** to support pure ADO.NET features like **DataTable and DataSet** etc.
 
 Examples
-**How to use SQLHandlerAsync for ExecuteNonQueryAsync**
+**How to use SQLAddUpdateAsync for ExecuteNonQueryAsync**
 
 ```
-public async Task<int> AddProject(ProjectInfo objInfo)
+public async Task<int> AddProjectAsync(ProjectInfo objInfo)
 {
-    List<KeyValuePair<string, object>> Param = new List<KeyValuePair<string, object>>();
-    Param.Add(new KeyValuePair<string, object>("@ProjectName", objInfo.ProjectName));
-    Param.Add(new KeyValuePair<string, object>("@ProjectCode", objInfo.ProjectCode));
+    List<SQLParam> Param = new List<SQLParam>();
+    Param.Add(new SQLParam("@ProjectName", objInfo.ProjectName));
+    Param.Add(new SQLParam("@ProjectCode", objInfo.ProjectCode));
     string strSpName = "usp_AddProject";
-    SQLHandlerAsync sqlHAsy = new SQLHandlerAsync();
+    SQLAddUpdateAsync sqlHAsy = new SQLAddUpdateAsync();
     return await sqlHAsy.ExecuteNonQueryAsync(strSpName, Param);
 }
 ```
 
-**How to use SQLHandlerAsync for ExecuteAsObjectAsync**
+**How to use SQLGetAsync for ExecuteAsObjectAsync**
 
 ```
-public async Task<ProjectInfo> GetProject(ProjectInfo objInfo)
+public async Task<ProjectInfo> GetProjectAsync(ProjectInfo objInfo)
 {
-    List<KeyValuePair<string, object>> Param = new List<KeyValuePair<string, object>>();
-    Param.Add(new KeyValuePair<string, object>("@ProjectID", objInfo.ProjectID));            
+    List<SQLParam> Param = new List<SQLParam>();
+    Param.Add(new SQLParam("@ProjectID", objInfo.ProjectID));
     string strSpName = "usp_GetProject";
-    SQLHandlerAsync sqlHAsy = new SQLHandlerAsync();
-    //List<ProjectInfo> objList = await sqlHAsy.ExecuteAsListAsync<ProjectInfo>(strSpName, Param);
+    SQLGetAsync sqlHAsy = new SQLGetAsync();            
     return await sqlHAsy.ExecuteAsObjectAsync<ProjectInfo>(strSpName, Param);
 }
 ```
 
-**How to use SQLHandlerAsync for ExecuteAsListAsync**
+**How to use SQLGetListAsync for ExecuteAsListAsync**
 
 ```
-public async Task<List<ProjectInfo>> GetProjectList()
-{    
+public async Task<IList<ProjectInfo>> GetProjectAsListAsync()
+{
     string strSpName = "usp_GetProjectList";
-    SQLHandlerAsync sqlHAsy = new SQLHandlerAsync();    
+    SQLGetListAsync sqlHAsy = new SQLGetListAsync();
     return await sqlHAsy.ExecuteAsListAsync<ProjectInfo>(strSpName);
 }
 ```
