@@ -25,7 +25,7 @@ namespace SQLHelper
         /// <param name="ParaMeterCollection"> Parameter Collection</param>
         /// <param name="OutPutParamerterName">Out Parameter Collection</param>
         /// <returns>Bool</returns>
-        public bool ExecuteNonQueryAsBool(string StroredProcedureName, List<KeyValuePair<string, object>> ParaMeterCollection, string OutPutParamerterName)
+        public bool ExecuteNonQueryAsBool(string StroredProcedureName, IList<SQLParam> ParaMeterCollection, string OutPutParamerterName)
         {
             SqlConnection SQLConn = new SqlConnection(this._connectionString);
             try
@@ -34,16 +34,8 @@ namespace SQLHelper
                 SQLCmd.Connection = SQLConn;
                 SQLCmd.CommandText = StroredProcedureName;
                 SQLCmd.CommandType = CommandType.StoredProcedure;
-                //Loop for Paramets
-                for (int i = 0; i < ParaMeterCollection.Count; i++)
-                {
-                    SqlParameter sqlParaMeter = new SqlParameter();
-                    sqlParaMeter.IsNullable = true;
-                    sqlParaMeter.ParameterName = ParaMeterCollection[i].Key;
-                    sqlParaMeter.Value = ParaMeterCollection[i].Value;
-                    SQLCmd.Parameters.Add(sqlParaMeter);
-                }
-                //End of for loop
+                SqlParameter[] sqlParameters = new SQLParamCollection(ParaMeterCollection).ParamCollection;
+                SQLCmd.Parameters.AddRange(sqlParameters);
                 SQLCmd.Parameters.Add(new SqlParameter(OutPutParamerterName, SqlDbType.Bit));
                 SQLCmd.Parameters[OutPutParamerterName].Direction = ParameterDirection.Output;
 
@@ -71,7 +63,7 @@ namespace SQLHelper
         /// <param name="OutPutParamerterName">OutPut Parameter Name</param>
         /// <param name="OutPutParamerterValue">OutPut Parameter Value</param>
         /// <returns>Bool</returns>
-        public bool ExecuteNonQueryAsBool(string StroredProcedureName, List<KeyValuePair<string, object>> ParaMeterCollection, string OutPutParamerterName, object OutPutParamerterValue)
+        public bool ExecuteNonQueryAsBool(string StroredProcedureName, IList<SQLParam> ParaMeterCollection, string OutPutParamerterName, object OutPutParamerterValue)
         {
             SqlConnection SQLConn = new SqlConnection(this._connectionString);
             try
@@ -80,15 +72,8 @@ namespace SQLHelper
                 SQLCmd.Connection = SQLConn;
                 SQLCmd.CommandText = StroredProcedureName;
                 SQLCmd.CommandType = CommandType.StoredProcedure;
-                //Loop for Paramets
-                for (int i = 0; i < ParaMeterCollection.Count; i++)
-                {
-                    SqlParameter sqlParaMeter = new SqlParameter();
-                    sqlParaMeter.IsNullable = true;
-                    sqlParaMeter.ParameterName = ParaMeterCollection[i].Key;
-                    sqlParaMeter.Value = ParaMeterCollection[i].Value;
-                    SQLCmd.Parameters.Add(sqlParaMeter);
-                }
+                SqlParameter[] sqlParameters = new SQLParamCollection(ParaMeterCollection).ParamCollection;
+                SQLCmd.Parameters.AddRange(sqlParameters);
                 //End of for loop
                 SQLCmd.Parameters.Add(new SqlParameter(OutPutParamerterName, SqlDbType.Bit));
                 SQLCmd.Parameters[OutPutParamerterName].Direction = ParameterDirection.Output;
@@ -113,8 +98,8 @@ namespace SQLHelper
         /// Execute Non Query
         /// </summary>
         /// <param name="StroredProcedureName">Store Procedure Name In String</param>
-        /// <param name="ParaMeterCollection">Accept Key Value Collection For Parameters<KeyValuePair<string, object>> </param>
-        public void ExecuteNonQuery(string StroredProcedureName, List<KeyValuePair<string, object>> ParaMeterCollection)
+        /// <param name="ParaMeterCollection">Accept Key Value Collection For Parameters<SQLParam> </param>
+        public void ExecuteNonQuery(string StroredProcedureName, IList<SQLParam> ParaMeterCollection)
         {
             SqlConnection SQLConn = new SqlConnection(this._connectionString);
             try
@@ -123,16 +108,8 @@ namespace SQLHelper
                 SQLCmd.Connection = SQLConn;
                 SQLCmd.CommandText = StroredProcedureName;
                 SQLCmd.CommandType = CommandType.StoredProcedure;
-                //Loop for Paramets
-                for (int i = 0; i < ParaMeterCollection.Count; i++)
-                {
-                    SqlParameter sqlParaMeter = new SqlParameter();
-                    sqlParaMeter.IsNullable = true;
-                    sqlParaMeter.ParameterName = ParaMeterCollection[i].Key;
-                    sqlParaMeter.Value = ParaMeterCollection[i].Value;
-                    SQLCmd.Parameters.Add(sqlParaMeter);
-                }
-                //End of for loop
+                SqlParameter[] sqlParameters = new SQLParamCollection(ParaMeterCollection).ParamCollection;
+                SQLCmd.Parameters.AddRange(sqlParameters);
 
                 SQLConn.Open();
                 SQLCmd.ExecuteNonQuery();
@@ -183,7 +160,7 @@ namespace SQLHelper
         /// <param name="ParaMeterCollection">Accept Key Value Collection for parameters</param>
         /// <param name="OutPutParamerterName">Accept Output parameter for the stored procedures</param>
         /// <returns></returns>
-        public T ExecuteNonQueryAsGivenType<T>(string StroredProcedureName, List<KeyValuePair<string, object>> ParaMeterCollection, string OutPutParamerterName)
+        public T ExecuteNonQueryAsGivenType<T>(string StroredProcedureName, IList<SQLParam> ParaMeterCollection, string OutPutParamerterName)
         {
             SqlConnection SQLConn = new SqlConnection(this._connectionString);
             try
@@ -192,16 +169,8 @@ namespace SQLHelper
                 SQLCmd.Connection = SQLConn;
                 SQLCmd.CommandText = StroredProcedureName;
                 SQLCmd.CommandType = CommandType.StoredProcedure;
-                //Loop for Paramets
-                for (int i = 0; i < ParaMeterCollection.Count; i++)
-                {
-                    SqlParameter sqlParaMeter = new SqlParameter();
-                    sqlParaMeter.IsNullable = true;
-                    sqlParaMeter.ParameterName = ParaMeterCollection[i].Key;
-                    sqlParaMeter.Value = ParaMeterCollection[i].Value;
-                    SQLCmd.Parameters.Add(sqlParaMeter);
-                }
-                //End of for loop                
+                SqlParameter[] sqlParameters = new SQLParamCollection(ParaMeterCollection).ParamCollection;
+                SQLCmd.Parameters.AddRange(sqlParameters);
                 SQLCmd = AddOutPutParametrofGivenType<T>(SQLCmd, OutPutParamerterName);
                 SQLConn.Open();
                 SQLCmd.ExecuteNonQuery();
@@ -226,7 +195,7 @@ namespace SQLHelper
         /// <param name="ParaMeterCollection">Accept Key Value Collection for parameters</param>
         /// <param name="OutPutParamerterName">Accept Output parameter for the stored procedures</param>
         /// <returns></returns>
-        public T ExecuteNonQueryAsGivenType<T>(string StroredProcedureName, List<KeyValuePair<string, object>> ParaMeterCollection, string OutPutParamerterName, object OutPutParamerterValue)
+        public T ExecuteNonQueryAsGivenType<T>(string StroredProcedureName, IList<SQLParam> ParaMeterCollection, string OutPutParamerterName, object OutPutParamerterValue)
         {
             SqlConnection SQLConn = new SqlConnection(this._connectionString);
             try
@@ -236,14 +205,10 @@ namespace SQLHelper
                 SQLCmd.CommandText = StroredProcedureName;
                 SQLCmd.CommandType = CommandType.StoredProcedure;
                 //Loop for Paramets
-                for (int i = 0; i < ParaMeterCollection.Count; i++)
-                {
-                    SqlParameter sqlParaMeter = new SqlParameter();
-                    sqlParaMeter.IsNullable = true;
-                    sqlParaMeter.ParameterName = ParaMeterCollection[i].Key;
-                    sqlParaMeter.Value = ParaMeterCollection[i].Value;
-                    SQLCmd.Parameters.Add(sqlParaMeter);
-                }
+
+                SqlParameter[] sqlParameters = new SQLParamCollection(ParaMeterCollection).ParamCollection;
+                SQLCmd.Parameters.AddRange(sqlParameters);
+                
                 //End of for loop                
                 SQLCmd = AddOutPutParametrofGivenType<T>(SQLCmd, OutPutParamerterName, OutPutParamerterValue);
                 SQLConn.Open();
@@ -268,7 +233,7 @@ namespace SQLHelper
         /// <param name="ParaMeterCollection">Accept Key Value Collection For Parameters</param>
         /// <param name="OutPutParamerterName">Accept OutPut Key Value Collection For Parameters</param>
         /// <returns></returns>
-        public int ExecuteNonQuery(string StroredProcedureName, List<KeyValuePair<string, object>> ParaMeterCollection, string OutPutParamerterName)
+        public int ExecuteNonQuery(string StroredProcedureName, IList<SQLParam> ParaMeterCollection, string OutPutParamerterName)
         {
             SqlConnection SQLConn = new SqlConnection(this._connectionString);
             try
@@ -278,16 +243,8 @@ namespace SQLHelper
                 SQLCmd.Connection = SQLConn;
                 SQLCmd.CommandText = StroredProcedureName;
                 SQLCmd.CommandType = CommandType.StoredProcedure;
-                //Loop for Paramets
-                for (int i = 0; i < ParaMeterCollection.Count; i++)
-                {
-                    SqlParameter sqlParaMeter = new SqlParameter();
-                    sqlParaMeter.IsNullable = true;
-                    sqlParaMeter.ParameterName = ParaMeterCollection[i].Key;
-                    sqlParaMeter.Value = ParaMeterCollection[i].Value;
-                    SQLCmd.Parameters.Add(sqlParaMeter);
-                }
-                //End of for loop
+                SqlParameter[] sqlParameters = new SQLParamCollection(ParaMeterCollection).ParamCollection;
+                SQLCmd.Parameters.AddRange(sqlParameters);
                 SQLCmd.Parameters.Add(new SqlParameter(OutPutParamerterName, SqlDbType.Int));
                 SQLCmd.Parameters[OutPutParamerterName].Direction = ParameterDirection.Output;
 

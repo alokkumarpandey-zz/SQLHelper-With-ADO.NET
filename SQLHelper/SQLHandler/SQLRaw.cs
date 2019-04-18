@@ -10,7 +10,7 @@ using System.Reflection;
 
 namespace SQLHelper
 {
-    public partial class SQLRaw  : SQLHandler
+    public partial class SQLRaw : SQLHandler
     {
         public SQLRaw()
         {
@@ -73,20 +73,14 @@ namespace SQLHelper
             return;
         }
 
-        public int ExecuteNonQuery(SqlTransaction transaction, CommandType commandType, string commandText, List<KeyValuePair<string, object>> ParaMeterCollection, string outParamName)
+        public int ExecuteNonQuery(SqlTransaction transaction, CommandType commandType, string commandText, List<SQLParam> ParaMeterCollection, string outParamName)
         {
             //create a command and prepare it for execution
             SqlCommand cmd = new SqlCommand();
             PrepareCommand(cmd, transaction.Connection, transaction, commandType, commandText);
 
-            for (int i = 0; i < ParaMeterCollection.Count; i++)
-            {
-                SqlParameter sqlParaMeter = new SqlParameter();
-                sqlParaMeter.IsNullable = true;
-                sqlParaMeter.ParameterName = ParaMeterCollection[i].Key;
-                sqlParaMeter.Value = ParaMeterCollection[i].Value;
-                cmd.Parameters.Add(sqlParaMeter);
-            }
+            SqlParameter[] sqlParameters = new SQLParamCollection(ParaMeterCollection).ParamCollection;
+            cmd.Parameters.AddRange(sqlParameters);
             cmd.Parameters.Add(new SqlParameter(outParamName, SqlDbType.Int));
             cmd.Parameters[outParamName].Direction = ParameterDirection.Output;
 
@@ -99,20 +93,14 @@ namespace SQLHelper
             return id;
         }
 
-        public void ExecuteNonQuery(SqlTransaction transaction, CommandType commandType, string commandText, List<KeyValuePair<string, object>> ParaMeterCollection)
+        public void ExecuteNonQuery(SqlTransaction transaction, CommandType commandType, string commandText, List<SQLParam> ParaMeterCollection)
         {
             //create a command and prepare it for execution
             SqlCommand cmd = new SqlCommand();
             PrepareCommand(cmd, transaction.Connection, transaction, commandType, commandText);
 
-            for (int i = 0; i < ParaMeterCollection.Count; i++)
-            {
-                SqlParameter sqlParaMeter = new SqlParameter();
-                sqlParaMeter.IsNullable = true;
-                sqlParaMeter.ParameterName = ParaMeterCollection[i].Key;
-                sqlParaMeter.Value = ParaMeterCollection[i].Value;
-                cmd.Parameters.Add(sqlParaMeter);
-            }
+            SqlParameter[] sqlParameters = new SQLParamCollection(ParaMeterCollection).ParamCollection;
+            cmd.Parameters.AddRange(sqlParameters);
 
             //finally, execute the command.
             cmd.ExecuteNonQuery();
@@ -323,32 +311,7 @@ namespace SQLHelper
 
         #region "Public Methods"
 
-        /// <summary>
-        /// RollBack Module Installation If Error Occur During Module Installation
-        /// </summary>
-        /// <param name="ModuleID">ModuleID</param>
-        /// <param name="PortalID">PortalID</param>
-        public void ModulesRollBack(int ModuleID, int PortalID)
-        {
-            try
-            {
-                SqlConnection SQLConn = new SqlConnection(this._connectionString);
-                SqlCommand SQLCmd = new SqlCommand();
-                SQLCmd.Connection = SQLConn;
-                SQLCmd.CommandText = "dbo.sp_ModulesRollBack";
-                SQLCmd.CommandType = CommandType.StoredProcedure;
-                SQLCmd.Parameters.Add(new SqlParameter("@ModuleID", ModuleID));
-                SQLCmd.Parameters.Add(new SqlParameter("@PortalID", PortalID));
-                SQLConn.Open();
-                SQLCmd.ExecuteNonQuery();
-                SQLConn.Close();
-            }
-            catch (Exception e)
-            {
-                throw e;
-            }
-        }
-
+        
         /// <summary>
         /// Execute As DataReader
         /// </summary>
@@ -382,7 +345,7 @@ namespace SQLHelper
         /// <param name="StroredProcedureName">Store Procedure Name </param>
         /// <param name="ParaMeterCollection">Accept Key Value Collection For Parameters</param>
         /// <returns></returns>
-        public SqlDataReader ExecuteAsDataReader(string StroredProcedureName, List<KeyValuePair<string, object>> ParaMeterCollection)
+        public SqlDataReader ExecuteAsDataReader(string StroredProcedureName, List<SQLParam> ParaMeterCollection)
         {
             try
             {
@@ -392,16 +355,8 @@ namespace SQLHelper
                 SQLCmd.Connection = SQLConn;
                 SQLCmd.CommandText = StroredProcedureName;
                 SQLCmd.CommandType = CommandType.StoredProcedure;
-                //Loop for Paramets
-                for (int i = 0; i < ParaMeterCollection.Count; i++)
-                {
-                    SqlParameter sqlParaMeter = new SqlParameter();
-                    sqlParaMeter.IsNullable = true;
-                    sqlParaMeter.ParameterName = ParaMeterCollection[i].Key;
-                    sqlParaMeter.Value = ParaMeterCollection[i].Value;
-                    SQLCmd.Parameters.Add(sqlParaMeter);
-                }
-                //End of for loop
+                SqlParameter[] sqlParameters = new SQLParamCollection(ParaMeterCollection).ParamCollection;
+                SQLCmd.Parameters.AddRange(sqlParameters);
                 SQLConn.Open();
                 SQLReader = SQLCmd.ExecuteReader(CommandBehavior.CloseConnection);
                 return SQLReader;

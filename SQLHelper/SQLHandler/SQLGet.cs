@@ -25,7 +25,7 @@ namespace SQLHelper
         /// <param name="StroredProcedureName">StoreProcedure Name</param>
         /// <param name="ParaMeterCollection">Accept Key Value Collection For Parameters</param>
         /// <returns></returns>
-        public T ExecuteAsObject<T>(string StroredProcedureName, List<KeyValuePair<string, object>> ParaMeterCollection)
+        public T ExecuteAsObject<T>(string StroredProcedureName, List<SQLParam> ParaMeterCollection)
         {
             SqlConnection SQLConn = new SqlConnection(this._connectionString);
             try
@@ -36,16 +36,8 @@ namespace SQLHelper
                 SQLCmd.Connection = SQLConn;
                 SQLCmd.CommandText = StroredProcedureName;
                 SQLCmd.CommandType = CommandType.StoredProcedure;
-                //Loop for Parameters
-                for (int i = 0; i < ParaMeterCollection.Count; i++)
-                {
-                    SqlParameter sqlParaMeter = new SqlParameter();
-                    sqlParaMeter.IsNullable = true;
-                    sqlParaMeter.ParameterName = ParaMeterCollection[i].Key;
-                    sqlParaMeter.Value = ParaMeterCollection[i].Value;
-                    SQLCmd.Parameters.Add(sqlParaMeter);
-                }
-                //End of for loop
+                SqlParameter[] sqlParameters = new SQLParamCollection(ParaMeterCollection).ParamCollection;
+                SQLCmd.Parameters.AddRange(sqlParameters);
                 SQLConn.Open();
                 SQLReader = SQLCmd.ExecuteReader(CommandBehavior.CloseConnection);
                 ArrayList arrColl = DataSourceHelper.FillCollection(SQLReader, typeof(T));
@@ -126,7 +118,7 @@ namespace SQLHelper
         /// <param name="StroredProcedureName">StoreProcedure Name</param>
         /// <param name="ParaMeterCollection">Accept Key Value Collection For Parameters</param>
         /// <returns></returns>
-        public T ExecuteAsScalar<T>(string StroredProcedureName, List<KeyValuePair<string, object>> ParaMeterCollection)
+        public T ExecuteAsScalar<T>(string StroredProcedureName, List<SQLParam> ParaMeterCollection)
         {
             SqlConnection SQLConn = new SqlConnection(this._connectionString);
             try
@@ -135,16 +127,8 @@ namespace SQLHelper
                 SQLCmd.Connection = SQLConn;
                 SQLCmd.CommandText = StroredProcedureName;
                 SQLCmd.CommandType = CommandType.StoredProcedure;
-                //Loop for Paramets
-                for (int i = 0; i < ParaMeterCollection.Count; i++)
-                {
-                    SqlParameter sqlParaMeter = new SqlParameter();
-                    sqlParaMeter.IsNullable = true;
-                    sqlParaMeter.ParameterName = ParaMeterCollection[i].Key;
-                    sqlParaMeter.Value = ParaMeterCollection[i].Value;
-                    SQLCmd.Parameters.Add(sqlParaMeter);
-                }
-                //End of for loop
+                SqlParameter[] sqlParameters = new SQLParamCollection(ParaMeterCollection).ParamCollection;
+                SQLCmd.Parameters.AddRange(sqlParameters);
                 SQLConn.Open();
                 return (T)SQLCmd.ExecuteScalar();
             }
