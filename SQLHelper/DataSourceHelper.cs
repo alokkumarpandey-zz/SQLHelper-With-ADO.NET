@@ -496,10 +496,10 @@ namespace SQLHelper
         /// 	[cnurse]	10/10/2005	Created
         /// </history>
         /// -----------------------------------------------------------------------------
-        public static List<T> FillCollection<T>(IDataReader dr)
+        public static IList<T> FillCollection<T>(IDataReader dr)
         {
 
-            List<T> objFillCollection = new List<T>();
+            IList<T> objFillCollection = new List<T>();
             T objFillObject;
 
             // iterate datareader
@@ -520,6 +520,8 @@ namespace SQLHelper
             return objFillCollection;
 
         }
+
+
 
         /// -----------------------------------------------------------------------------
         /// <summary>
@@ -654,9 +656,9 @@ namespace SQLHelper
         /// <history>
         /// </history>
         /// -----------------------------------------------------------------------------
-        public static List<T> FillCollection<T>(DataTable dt)
+        public static IList<T> FillCollection<T>(DataTable dt)
         {
-            List<T> objFillCollection = new List<T>();
+            IList<T> objFillCollection = new List<T>();
             T objFillObject;
             for (int i = 0; i < dt.Rows.Count; i++)
             {

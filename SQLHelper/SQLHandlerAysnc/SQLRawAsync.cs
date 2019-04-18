@@ -13,32 +13,6 @@ namespace SQLHelper
             _connectionString = Connectionconfig;
         }
 
-        public async void ModulesRollBackAsync(int ModuleID, int PortalID)
-        {
-            using (SqlConnection SQLConn = new SqlConnection(this._connectionString))
-            {
-                using (SqlCommand SQLCmd = new SqlCommand())
-                {
-                    SQLCmd.Connection = SQLConn;
-                    SQLCmd.CommandText = "dbo.sp_ModulesRollBack";
-                    SQLCmd.CommandType = CommandType.StoredProcedure;
-                    SQLCmd.Parameters.Add(new SqlParameter("@ModuleID", ModuleID));
-                    SQLCmd.Parameters.Add(new SqlParameter("@PortalID", PortalID));
-                    try
-                    {
-                        await SQLConn.OpenAsync();// .Open();
-                        await SQLCmd.ExecuteNonQueryAsync();// ExecuteNonQuery();
-                        SQLConn.Close();
-                    }
-                    catch (Exception e)
-                    {
-                        throw e;
-                    }
-                }
-
-            }
-        }
-
         /// <summary>
         /// Execute As DataReader
         /// </summary>
@@ -75,7 +49,7 @@ namespace SQLHelper
         /// <param name="StroredProcedureName">Store Procedure Name </param>
         /// <param name="ParaMeterCollection">Accept Key Value Collection For Parameters</param>
         /// <returns></returns>
-        public async Task<SqlDataReader> ExecuteAsDataReaderAsync(string StroredProcedureName, List<KeyValuePair<string, object>> ParaMeterCollection)
+        public async Task<SqlDataReader> ExecuteAsDataReaderAsync(string StroredProcedureName, List<SQLParam> ParaMeterCollection)
         {
             using (SqlConnection SQLConn = new SqlConnection(this._connectionString))
             {
@@ -84,16 +58,8 @@ namespace SQLHelper
                     SQLCmd.Connection = SQLConn;
                     SQLCmd.CommandText = StroredProcedureName;
                     SQLCmd.CommandType = CommandType.StoredProcedure;
-                    //Loop for Paramets
-                    for (int i = 0; i < ParaMeterCollection.Count; i++)
-                    {
-                        SqlParameter sqlParaMeter = new SqlParameter();
-                        sqlParaMeter.IsNullable = true;
-                        sqlParaMeter.ParameterName = ParaMeterCollection[i].Key;
-                        sqlParaMeter.Value = ParaMeterCollection[i].Value;
-                        SQLCmd.Parameters.Add(sqlParaMeter);
-                    }
-                    //End of for loop
+                    SqlParameter[] sqlParameters = new SQLParamCollection(ParaMeterCollection).ParamCollection;
+                    SQLCmd.Parameters.AddRange(sqlParameters);
                     try
                     {
                         SqlDataReader SQLReader;

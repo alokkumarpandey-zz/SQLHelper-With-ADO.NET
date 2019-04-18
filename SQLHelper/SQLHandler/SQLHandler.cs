@@ -181,8 +181,6 @@ namespace SQLHelper
             return SQLCmd;
         }
 
-
-
         /// <summary>
         /// Execute SQL
         /// </summary>
@@ -224,17 +222,15 @@ namespace SQLHelper
             }
         }
 
-
-
         /// <summary>
-        /// Bulid Collection of List<KeyValuePair<string, object>> for Given object
+        /// Bulid Collection of List<SQLParam> for Given object
         /// </summary>
         /// <typeparam name="List">List of Type(string,object)</typeparam>
         /// <param name="paramCollection">List of Type(string,object)</param>
         /// <param name="obj">Object</param>
         /// <param name="excludeNullValue">Set True To Exclude Properties Having Null Value In The Object From Adding To The Collection</param>
-        /// <returns> Collection of KeyValuePair<string, object></returns>
-        public List<KeyValuePair<string, object>> BuildParameterCollection(List<KeyValuePair<string, object>> paramCollection, object obj, bool excludeNullValue)
+        /// <returns> Collection of SQLParam</returns>
+        public List<SQLParam> BuildParameterCollection(List<SQLParam> paramCollection, object obj, bool excludeNullValue)
         {
             try
             {
@@ -244,7 +240,7 @@ namespace SQLHelper
                     {
                         if (objProperty.GetValue(obj, null) != null)
                         {
-                            paramCollection.Add(new KeyValuePair<string, object>("@" + objProperty.Name.ToString(), objProperty.GetValue(obj, null)));
+                            paramCollection.Add(new SQLParam("@" + objProperty.Name.ToString(), objProperty.GetValue(obj, null)));
                         }
                     }
                 }
@@ -252,7 +248,7 @@ namespace SQLHelper
                 {
                     foreach (PropertyInfo objProperty in obj.GetType().GetProperties())
                     {
-                        paramCollection.Add(new KeyValuePair<string, object>("@" + objProperty.Name.ToString(), objProperty.GetValue(obj, null)));
+                        paramCollection.Add(new SQLParam("@" + objProperty.Name.ToString(), objProperty.GetValue(obj, null)));
                     }
                     return paramCollection;
                 }

@@ -25,7 +25,7 @@ namespace SQLHelper
         /// <param name="StroredProcedureName">StoreProcedure Name</param>
         /// <param name="ParaMeterCollection"></param>
         /// <returns></returns>
-        public async Task<List<T>> ExecuteAsListAsync<T>(string StroredProcedureName, List<KeyValuePair<string, object>> ParaMeterCollection)
+        public async Task<IList<T>> ExecuteAsListAsync<T>(string StroredProcedureName, List<SQLParam> ParaMeterCollection)
         {
             using (SqlConnection SQLConn = new SqlConnection(_connectionString))
             {
@@ -34,24 +34,14 @@ namespace SQLHelper
                     SQLCmd.Connection = SQLConn;
                     SQLCmd.CommandText = StroredProcedureName;
                     SQLCmd.CommandType = CommandType.StoredProcedure;
-                    //Loop for Paramets
-                    for (int i = 0; i < ParaMeterCollection.Count; i++)
-                    {
-                        SqlParameter sqlParaMeter = new SqlParameter();
-                        sqlParaMeter.IsNullable = true;
-                        sqlParaMeter.ParameterName = ParaMeterCollection[i].Key;
-                        sqlParaMeter.Value = ParaMeterCollection[i].Value;
-                        SQLCmd.Parameters.Add(sqlParaMeter);
-
-                    }
-                    //End of for loop
+                    SqlParameter[] sqlParameters = new SQLParamCollection(ParaMeterCollection).ParamCollection;
+                    SQLCmd.Parameters.AddRange(sqlParameters);
                     try
                     {
                         SqlDataReader SQLReader;
                         await SQLConn.OpenAsync();
                         SQLReader = await SQLCmd.ExecuteReaderAsync(CommandBehavior.CloseConnection); //datareader automatically closes the SQL connection
-                        List<T> mList = new List<T>();
-                        mList = DataSourceHelper.FillCollection<T>(SQLReader);
+                        IList<T> mList = DataSourceHelper.FillCollection<T>(SQLReader);
                         if (SQLReader != null)
                         {
                             SQLReader.Close();
@@ -77,7 +67,7 @@ namespace SQLHelper
         /// <typeparam name="T"><T></typeparam>
         /// <param name="StroredProcedureName">Storedprocedure Name</param>
         /// <returns></returns>
-        public async Task<List<T>> ExecuteAsListAsync<T>(string StroredProcedureName)
+        public async Task<IList<T>> ExecuteAsListAsync<T>(string StroredProcedureName)
         {
             using (SqlConnection SQLConn = new SqlConnection(this._connectionString))
             {
@@ -91,8 +81,90 @@ namespace SQLHelper
                         SqlDataReader SQLReader;
                         await SQLConn.OpenAsync();
                         SQLReader = await SQLCmd.ExecuteReaderAsync(CommandBehavior.CloseConnection); //datareader automatically closes the SQL connection
-                        List<T> mList = new List<T>();
-                        mList = DataSourceHelper.FillCollection<T>(SQLReader);
+                        IList<T> mList = DataSourceHelper.FillCollection<T>(SQLReader);
+                        if (SQLReader != null)
+                        {
+                            SQLReader.Close();
+                        }
+                        SQLConn.Close();
+                        return mList;
+                    }
+                    catch (Exception e)
+                    {
+                        throw e;
+                    }
+                    finally
+                    {
+                        SQLConn.Close();
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Execute As list
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="StroredProcedureName">StoreProcedure Name</param>
+        /// <param name="ParaMeterCollection"></param>
+        /// <returns></returns>
+        public async Task<IEnumerable<T>> ExecuteAsEnumerableAsync<T>(string StroredProcedureName, List<SQLParam> ParaMeterCollection)
+        {
+            using (SqlConnection SQLConn = new SqlConnection(_connectionString))
+            {
+                using (SqlCommand SQLCmd = new SqlCommand())
+                {
+                    SQLCmd.Connection = SQLConn;
+                    SQLCmd.CommandText = StroredProcedureName;
+                    SQLCmd.CommandType = CommandType.StoredProcedure;
+                    SqlParameter[] sqlParameters = new SQLParamCollection(ParaMeterCollection).ParamCollection;
+                    SQLCmd.Parameters.AddRange(sqlParameters);
+                    try
+                    {
+                        SqlDataReader SQLReader;
+                        await SQLConn.OpenAsync();
+                        SQLReader = await SQLCmd.ExecuteReaderAsync(CommandBehavior.CloseConnection); //datareader automatically closes the SQL connection
+                        IEnumerable<T> mList = DataSourceHelper.FillCollection<T>(SQLReader);
+                        if (SQLReader != null)
+                        {
+                            SQLReader.Close();
+                        }
+                        SQLConn.Close();
+                        return mList;
+                    }
+                    catch (Exception e)
+                    {
+                        throw e;
+                    }
+                    finally
+                    {
+                        SQLConn.Close();
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Execute As List
+        /// </summary>
+        /// <typeparam name="T"><T></typeparam>
+        /// <param name="StroredProcedureName">Storedprocedure Name</param>
+        /// <returns></returns>
+        public async Task<IEnumerable<T>> ExecuteAsEnumerableAsync<T>(string StroredProcedureName)
+        {
+            using (SqlConnection SQLConn = new SqlConnection(this._connectionString))
+            {
+                using (SqlCommand SQLCmd = new SqlCommand())
+                {
+                    SQLCmd.Connection = SQLConn;
+                    SQLCmd.CommandText = StroredProcedureName;
+                    SQLCmd.CommandType = CommandType.StoredProcedure;
+                    try
+                    {
+                        SqlDataReader SQLReader;
+                        await SQLConn.OpenAsync();
+                        SQLReader = await SQLCmd.ExecuteReaderAsync(CommandBehavior.CloseConnection); //datareader automatically closes the SQL connection
+                        IEnumerable<T> mList = DataSourceHelper.FillCollection<T>(SQLReader);
                         if (SQLReader != null)
                         {
                             SQLReader.Close();
@@ -118,7 +190,7 @@ namespace SQLHelper
         /// <param name="StroredProcedureName">StoreProcedure Name</param>
         /// <param name="ParaMeterCollection">Accept Key Value Collection For Parameters</param>
         /// <returns></returns>
-        public async Task<DataSet> ExecuteAsDataSetAsync(string StroredProcedureName, List<KeyValuePair<string, object>> ParaMeterCollection)
+        public async Task<DataSet> ExecuteAsDataSetAsync(string StroredProcedureName, List<SQLParam> ParaMeterCollection)
         {
             using (SqlConnection SQLConn = new SqlConnection(this._connectionString))
             {
@@ -130,16 +202,8 @@ namespace SQLHelper
                     SQLCmd.CommandText = StroredProcedureName;
                     SQLCmd.CommandType = CommandType.StoredProcedure;
 
-                    //Loop for Paramets
-                    for (int i = 0; i < ParaMeterCollection.Count; i++)
-                    {
-                        SqlParameter sqlParaMeter = new SqlParameter();
-                        sqlParaMeter.IsNullable = true;
-                        sqlParaMeter.ParameterName = ParaMeterCollection[i].Key;
-                        sqlParaMeter.Value = ParaMeterCollection[i].Value;
-                        SQLCmd.Parameters.Add(sqlParaMeter);
-                    }
-                    //End of for loop
+                    SqlParameter[] sqlParameters = new SQLParamCollection(ParaMeterCollection).ParamCollection;
+                    SQLCmd.Parameters.AddRange(sqlParameters);
 
                     SQLAdapter.SelectCommand = SQLCmd;
                     try
