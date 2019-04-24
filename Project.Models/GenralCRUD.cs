@@ -15,7 +15,7 @@ namespace Project.Models
             Param.Add(new SQLParam("@ProjectName", objInfo.ProjectName));
             Param.Add(new SQLParam("@ProjectCode", objInfo.ProjectCode));
             string strSpName = "usp_AddProject";
-            SQLAddUpdateAsync sqlHAsy = new SQLAddUpdateAsync();
+            SQLExecuteNonQueryAsync sqlHAsy = new SQLExecuteNonQueryAsync();
             return await sqlHAsy.ExecuteNonQueryAsync(strSpName, Param);
         }
         public async Task<int> UpdateProject(ProjectInfo objInfo)
@@ -25,7 +25,7 @@ namespace Project.Models
             Param.Add(new SQLParam("@ProjectName", objInfo.ProjectName));
             Param.Add(new SQLParam("@ProjectCode", objInfo.ProjectCode));
             string strSpName = "usp_UpdateProject";
-            SQLAddUpdateAsync sqlHAsy = new SQLAddUpdateAsync();
+            SQLExecuteNonQueryAsync sqlHAsy = new SQLExecuteNonQueryAsync();
             return await sqlHAsy.ExecuteNonQueryAsync(strSpName, Param);
         }
         public async Task<ProjectInfo> GetProject(ProjectInfo objInfo)

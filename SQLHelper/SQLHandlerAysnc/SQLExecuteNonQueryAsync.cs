@@ -6,11 +6,11 @@ using System.Threading.Tasks;
 
 namespace SQLHelper
 {
-    public partial class SQLAddUpdateAsync : SQLHandlerAsync
+    public partial class SQLExecuteNonQueryAsync : SQLHandlerAsync
     {
 
         #region Constructor
-        public SQLAddUpdateAsync()
+        public SQLExecuteNonQueryAsync()
         {
             //Note there is lot of way to set this, please use your needed way to do this connections string vallue setting
             _connectionString = Connectionconfig;
