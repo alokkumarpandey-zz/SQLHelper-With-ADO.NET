@@ -10,9 +10,9 @@ using System.Reflection;
 
 namespace SQLHelper
 {
-    public partial class SQLAddUpdate : SQLHandler
+    public partial class SQLExecuteNonQuery : SQLHandler
     {
-        public SQLAddUpdate()
+        public SQLExecuteNonQuery()
         {
             _connectionString = Connectionconfig;
         }
